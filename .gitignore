@@ -1,0 +1,141 @@
+# =========================
+# General
+# =========================
+.DS_Store
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.orig
+.env
+.env.*
+!.env.example
+
+# Node.js (for frontend or backend microservices)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+
+# Python (FastAPI, utility scripts)
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+venv/
+.env/
+.venv/
+*.sqlite3
+
+# =========================
+# Docker
+# =========================
+# Ignore built images and intermediate layers
+**/docker-compose.override.yml
+**/docker-compose.dev.yml
+**/docker-compose.local.yml
+.docker/
+.dockerignore
+*~Dockerfile
+*.tar
+
+# =========================
+# Terraform
+# =========================
+# Local .terraform directories
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+terraform.tfvars
+terraform.tfvars.json
+.terraformrc
+terraform.rc
+
+# =========================
+# AWS & Credentials
+# =========================
+.aws/
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.tfstate
+*.tfstate.*
+terraform.tfstate.d/
+**/terraform.tfstate*
+**/terraform.tfstate.backup*
+**/tfplan
+
+# =========================
+# CI/CD
+# =========================
+# Ignore runner config or temporary artifacts
+.github/workflows/tmp/
+.github/workflows/cache/
+**/gh-actions-runner/
+**/actions-runner/
+**/runner-config/
+
+# =========================
+# IDE / Editor files
+# =========================
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# =========================
+# OS Files
+# =========================
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# =========================
+# Monitoring & Logs
+# =========================
+prometheus_data/
+grafana_data/
+logs/
+*.log
+*.out
+*.err
+
+# =========================
+# Compiled files / binaries
+# =========================
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.o
+*.a
+*.class
+*.jar
+
+# =========================
+# Custom project ignores
+# =========================
+# ECR push or local test images
+**/build/
+**/output/
+**/test-reports/
+**/coverage/
+**/tmp/

@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "4000:4000"
+    networks:
+      - app-network
+
+  data-service:
+    build: ./data-service
+    container_name: data-service
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - auth-service
+      - data-service
+    environment:
+      - REACT_APP_AUTH_URL=http://auth-service:4000
+      - REACT_APP_DATA_URL=http://data-service:8000
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
