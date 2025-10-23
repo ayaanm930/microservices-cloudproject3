@@ -62,7 +62,9 @@ This runs the frontend on **[http://localhost:3000](http://localhost:3000)**.
 
 ## 🔑 2. Auth Service (Node.js + Express)
 
-**Purpose:** Handles authentication logic — registration, login, JWT token generation.
+**Purpose:** Usually Handles authentication logic — registration, login, JWT token generation.
+
+**Our Demo:** Just shows some Auth Service text.
 
 **Setup:**
 
@@ -87,6 +89,8 @@ Runs on **[http://localhost:4000](http://localhost:4000)**.
 ## 🐍 3. Backend Service (Python + FastAPI)
 
 **Purpose:** Simulates business or data-processing logic.
+
+**Our Demo:** Shows names of Avengers
 
 **Setup:**
 
@@ -113,12 +117,12 @@ Run each service manually on its own port.
 1. Visit the frontend ([http://localhost:3000](http://localhost:3000)) — it should connect to both APIs.
 2. Try stopping one service (e.g., FastAPI backend).
 
-   * The React app may show missing data, but still loads fine.
+   * The React app throws an error page covering the content undernneath
 3. Stop the auth service next.
 
-   * Login actions fail, but other parts of the app still function.
+   * React app throes an error page as well and disrupts the user's experience
 
-✅ **Result:** You’ve just simulated *partial failure* — something that would crash a monolithic app, but in a microservice setup, other services stay alive.
+✅ **Result:** You’ve just simulated *a failure* — disabling one service has affected the entire webapp.
 
 ---
 
@@ -137,13 +141,15 @@ docker build -t python-backend ./backend-service
 **Run manually:**
 
 ```bash
-docker run -d -p 3000:3000 react-frontend
+docker run -d -p 3000:80 react-frontend # 80 because that's the usual port for HTTP
 docker run -d -p 4000:4000 node-auth
 docker run -d -p 8000:8000 python-backend
 ```
 
 **Test failure scenario again:**
 Stop one container (`docker stop python-backend`) and see that the others remain functional.
+
+✅ ***Result*** : You’ve just simulated *partial failure* — something that would crash a monolithic app, but in a microservice setup, other services stay alive.
 
 ---
 
@@ -159,7 +165,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "3000:3000"
+      - "3000:80" # set to open on port 80 - usual port for HTTP
     depends_on:
       - auth
       - backend
@@ -178,7 +184,25 @@ services:
 **Run all at once:**
 
 ```bash
-docker compose up --build
+docker compose up --build # first time build // rebuild images before starting
+```
+
+**Other useful commands**
+
+```bash
+docker compose up -d # run in detached mode (run in background)
+```
+
+```bash
+docker compose down # stops and removes containers, networks, and default volumes creeated by Compose
+```
+
+```bash
+docker compose ps # view running services
+```
+
+```bash
+docker compose logs # view logs of conntainers managed by docker-compose
 ```
 
 ---
