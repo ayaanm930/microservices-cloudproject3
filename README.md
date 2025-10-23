@@ -71,15 +71,7 @@ This runs the frontend on **[http://localhost:3000](http://localhost:3000)**.
 ```bash
 cd auth-service
 npm install
-npm run dev
-```
-
-**Test Endpoints:**
-
-```bash
-GET  /health
-POST /login
-POST /register
+node index.js
 ```
 
 Runs on **[http://localhost:4000](http://localhost:4000)**.
