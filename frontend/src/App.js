@@ -5,13 +5,20 @@ function App() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/") // Python service
-      .then((res) => res.json())
-      .then((data) => setData(data));
+    // Use relative paths in Docker (nginx proxies to services)
+    // Falls back to localhost for local development
+    const dataUrl = process.env.NODE_ENV === 'production' ? '/api/data/' : 'http://localhost:8000/';
+    const authUrl = process.env.NODE_ENV === 'production' ? '/api/auth/' : 'http://localhost:4000/';
 
-    fetch("http://localhost:4000/") // Node auth service
+    fetch(dataUrl)
       .then((res) => res.json())
-      .then((msg) => setMessage(msg.message));
+      .then((data) => setData(data))
+      .catch((err) => console.error('Data service error:', err));
+
+    fetch(authUrl)
+      .then((res) => res.json())
+      .then((msg) => setMessage(msg.message))
+      .catch((err) => console.error('Auth service error:', err));
   }, []);
 
   return (

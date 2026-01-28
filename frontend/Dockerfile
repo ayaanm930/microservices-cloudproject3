@@ -20,6 +20,9 @@ FROM nginx:alpine
 # Copy build files from previous stage to NGINX HTML file path
 COPY --from=build /app/build /usr/share/nginx/html
 
+# Copy custom nginx config for API proxying
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose Nginx port - default 80 for http
 EXPOSE 80
 
