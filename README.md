@@ -223,13 +223,55 @@ Each service runs independently in its own container — communicating over a sh
 
 ---
 
-## 🛠️ 9. Next Steps
+## 🚀 9. Deployment on AWS EC2 with Kubernetes (Project 3)
 
-In the next stage, we’ll:
+This project has been updated to support deployment on an AWS EC2 instance running a local Kubernetes cluster (MicroK8s), fully managed via GitOps (ArgoCD) and GitHub Actions.
 
-* Deploy these microservices on **AWS ECS Fargate** using **Terraform**
-* Implement a **CI/CD pipeline** with **GitHub Actions**
-* Add **Prometheus & Grafana** for observability
+### Deployment Steps:
+
+**1. Provision Infrastructure with Terraform:**
+```bash
+cd terraform
+terraform init
+terraform apply -auto-approve
+```
+This will create a VPC, Security Groups, an EC2 instance, and output the public IP of the instance as well as the SSH private key. Save the private key to access the EC2 instance.
+
+**2. Configure the Node with Ansible:**
+Save the output private key to a file (e.g. `k8s_key.pem`), set correct permissions (`chmod 400 k8s_key.pem`), and run the Ansible playbook to install MicroK8s and ArgoCD:
+```bash
+cd ansible
+ansible-playbook -i "<EC2_PUBLIC_IP>," -u ubuntu --private-key k8s_key.pem playbook.yml
+```
+
+**3. Configure ArgoCD:**
+The Ansible playbook automatically installs ArgoCD and exposes it on NodePort `30443` (HTTPS) and `30081` (HTTP). 
+- Access the ArgoCD UI: `https://<EC2_PUBLIC_IP>:30443`
+- Retrieve the initial admin password from the EC2 instance:
+  ```bash
+  ssh -i k8s_key.pem ubuntu@<EC2_PUBLIC_IP>
+  kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+  ```
+
+**4. Deploy ArgoCD Application:**
+Apply the ArgoCD App configuration to track the repository:
+```bash
+kubectl apply -f k8s/argocd-app.yaml
+```
+ArgoCD will now monitor the `k8s/` folder in the main branch and auto-sync changes to the cluster.
+
+**5. CI/CD Pipeline (GitHub Actions):**
+Any push to the `main` branch will trigger the GitHub Actions pipeline (`.github/workflows/deploy.yml`), which:
+- Builds the Docker images for `frontend`, `auth-service`, and `data-service`.
+- Pushes the images to GitHub Container Registry (GHCR).
+- Updates the image tags in the `k8s/*.yaml` files and commits the changes back to the repository.
+- ArgoCD automatically detects the changes and deploys the new images to the MicroK8s cluster.
+
+**Accessing the Application:**
+Once deployed, the frontend application will be accessible at:
+```
+http://<EC2_PUBLIC_IP>:30080
+```
 
 ---
 

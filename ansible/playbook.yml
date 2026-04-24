@@ -1,0 +1,72 @@
+---
+- name: Setup MicroK8s on EC2
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required packages
+      apt:
+        name:
+          - snapd
+          - curl
+          - wget
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+        state: present
+
+    - name: Install MicroK8s
+      snap:
+        name: microk8s
+        classic: yes
+        channel: 1.30/stable
+
+    - name: Add ubuntu user to microk8s group
+      user:
+        name: ubuntu
+        groups: microk8s
+        append: yes
+
+    - name: Change ownership of ~/.kube
+      file:
+        path: /home/ubuntu/.kube
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Enable MicroK8s addons
+      command: microk8s enable dns ingress registry hostpath-storage
+      ignore_errors: yes
+
+    - name: Install kubectl (snap)
+      snap:
+        name: kubectl
+        classic: yes
+        
+    - name: Create kubectl alias for ubuntu user
+      lineinfile:
+        path: /home/ubuntu/.bashrc
+        line: "alias kubectl='microk8s kubectl'"
+        create: yes
+
+    - name: Install ArgoCD CLI
+      get_url:
+        url: https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+        dest: /usr/local/bin/argocd
+        mode: '0755'
+
+    - name: Create ArgoCD namespace
+      command: microk8s kubectl create namespace argocd
+      ignore_errors: yes
+
+    - name: Install ArgoCD
+      command: microk8s kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+      ignore_errors: yes
+
+    - name: Change ArgoCD server to NodePort
+      command: microk8s kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort", "ports": [{"port": 80,"targetPort": 8080,"nodePort": 30081,"name": "http"},{"port": 443,"targetPort": 8080,"nodePort": 30443,"name": "https"}]}}'
+      ignore_errors: yes

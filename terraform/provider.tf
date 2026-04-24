@@ -8,14 +8,7 @@ terraform {
     }
   }
 
-backend "s3" {
-    # Replace with values from terraform-bootstrap outputs
-    bucket         = "microservices-demo-tfstate-e077bc4c"
-    key            = "terraform/terraform.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "microservices-demo-tf-lock"
-    encrypt        = true
-  }
+
 }
 
 provider "aws" {
