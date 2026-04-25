@@ -1,223 +1,88 @@
-# Microservices Architecture  (React + Node.js + FastAPI)
-## Project 3 Cloud 
-->Mishal Ali 22i-1291
--> Ayaan Mughal 22i-0861
-
-This project demonstrates how **microservices architecture** works in contrast to a monolithic setup.
-You’ll see how splitting an app into independent services helps prevent total system failure — and how Docker makes it easy to run them together locally.
+# Cloud Computing Project 3: Multi-Tier Application Deployment
+## Section A
+- Mishal Ali 22i-1291
+- Ayaan Mughal 22i-0861
 
 ---
 
 ## Overview
 
-**Microservices architecture** solves this by breaking an application into smaller, independent services that:
+In this project, we have architected a complete deployment pipeline for a microservices-based application (React + Node.js + FastAPI). The application is deployed onto an AWS EC2 instance using industry-standard tools for Infrastructure as Code (IaC), configuration management, containerization, and Continuous Deployment (CD).
 
-* Run in isolation
-* Communicate via APIs
-* Can fail without crashing the entire system
-* Are easier to scale and maintain
+Public Project Used: https://github.com/nuelStarkOps/microservices-demo.git
 
-In this project:
+## Project Goal
 
-* The **React app** is the frontend interface
-* The **Node.js (Express)** service handles authentication
-* The **Python (FastAPI)** service provides business logic/data
+The objective is to deploy the codebase on an Amazon EC2 instance such that the application is fully functional, highly available, and accessible to external users. 
 
----
+## Methodology & Artifacts
 
-## Project Structure
+The project is structured according to the following deployment flow:
 
-```
-microservices-demo/
-├── frontend/        # React app (port 3000)
-├── auth-service/    # Node.js auth API (port 4000)
-├── backend-service/ # FastAPI backend (port 8000)
-├──ansible/
-├──k8s/
-├──terraform/
-└──docker-compose.yml
-```
+### 1. Containerization (Docker)
+- **Dockerfile:** A unique `Dockerfile` has been written for every microservice (`frontend`, `auth-service`, `backend-service`) in the codebase to enable automated image building.
 
----
+### 2. Infrastructure as Code (Terraform)
+- **AWS Provisioning:** Terraform is used to provision the target EC2 instance (`t3.medium`) within the AWS account.
+- **Networking & Security:** The Terraform configuration includes necessary supporting resources, such as a custom VPC, Subnets, Internet Gateway, and Security Groups, ensuring secure connectivity and exposing required ports.
 
-## ⚙️ 1. Frontend (React)
+### 3. Configuration as Code (Ansible)
+- **Node Setup:** An Ansible playbook (`ansible/playbook.yml`) completely configures the provisioned EC2 instance.
+- **Cluster Initialization:** The configuration automatically prepares the machine to run a local Kubernetes cluster (MicroK8s), sets up user permissions, and installs ArgoCD.
 
-**Purpose:** User interface that communicates with the Node.js and FastAPI services.
+### 4. Cluster (Kubernetes Manifests)
+- **Resource Definitions:** Kubernetes `Service` and `Deployment` manifests are written for every microservice inside the `k8s/` directory.
+- **Integration:** The deployment manifests natively utilize the Docker images created in the CI step, exposing the frontend via a NodePort.
 
-**Setup:**
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-**Environment Variables:**
-
-```
-REACT_APP_AUTH_URL=http://localhost:4000
-REACT_APP_BACKEND_URL=http://localhost:8000
-```
-
-This runs the frontend on **[http://localhost:3000](http://localhost:3000)**.
+### 5. CI/CD Pipeline (GitHub Actions & ArgoCD)
+- **CI Workflow:** A GitHub Actions workflow (`.github/workflows/deploy.yml`) is implemented to trigger on codebase changes to the `main` branch. It automatically rebuilds the Docker images and dynamically updates the Kubernetes manifests with the new image tags.
+- **CD Synchronization:** ArgoCD is configured on the cluster to constantly monitor the repository and automatically sync the Kubernetes cluster with the updated manifests in the `k8s/` folder.
 
 ---
 
-## 🔑 2. Auth Service (Node.js + Express)
-
-**Purpose:** Usually Handles authentication logic — registration, login, JWT token generation.
-
-**Our Project:** Just shows some Auth Service text.
-
-**Setup:**
-
-```bash
-cd auth-service
-npm install
-node index.js
-```
-
-Runs on **[http://localhost:4000](http://localhost:4000)**.
+## Deliverables Provided
+1. **Source Code:** Complete application code, Dockerfiles, and Kubernetes YAML files.
+2. **Infrastructure Code:** All `.tf` (Terraform) and `.yml` (Ansible) files.
+3. **CI/CD Config:** The GitHub Actions workflow and ArgoCD application configuration.
+4. **Documentation:** This comprehensive README detailing deployment steps and evidence.
 
 ---
 
-## 🐍 3. Backend Service (Python + FastAPI)
+## Architecture Diagram
 
-**Purpose:** Simulates business or data-processing logic.
-
-**Our Demo:** Shows names of Avengers
-
-**Setup:**
-
-```bash
-cd backend-service
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+```text
+                                  [ GitHub Repository ]
+                                           │ (Push to main)
+                                           ▼
+                                 [ GitHub Actions (CI) ]
+                                           │ (Build & Push Images)
+                                           ▼
+                               [ GitHub Container Registry ]
+                                           │
+                                           │ (ArgoCD Pulls & Syncs)
+                                           ▼
+┌────────────────────────────── AWS EC2 Instance (t3.medium) ──────────────────────────┐
+│                                                                                      │
+│  ┌──────────────────────────── Kubernetes Cluster (MicroK8s) ─────────────────────┐  │
+│  │                                                                                │  │
+│  │  [ ArgoCD ] <--- Monitors GitHub k8s/ manifests                                │  │
+│  │                                                                                │  │
+│  │           ┌──────────────┐         ┌────────────────┐         ┌──────────────┐ │  │
+│  │           │  Frontend    │ <-----> │  Auth Service  │ <-----> │  Backend     │ │  │
+│  │           │  (React)     │         │  (Node.js)     │         │  (FastAPI)   │ │  │
+│  │           └──────┬───────┘         └────────────────┘         └──────────────┘ │  │
+│  │                  │ (NodePort 30080)                                            │  │
+│  └──────────────────┼─────────────────────────────────────────────────────────────┘  │
+└─────────────────────┼────────────────────────────────────────────────────────────────┘
+                      │
+               [ External User ]
 ```
 
-**Test Endpoint:**
-
-```bash
-GET /health
-```
-
-Runs on **[http://localhost:8000](http://localhost:8000)**.
+Each service runs independently in its own Kubernetes Pod — communicating over the internal cluster network, while the entire deployment lifecycle is fully automated via GitOps.
 
 ---
 
-## 🧪 4. Local Testing
-
-Run each service manually on its own port.
-
-1. Visit the frontend ([http://localhost:3000](http://localhost:3000)) — it should connect to both APIs.
-2. Try stopping one service (e.g., FastAPI backend).
-
-   * The React app throws an error page covering the content undernneath
-3. Stop the auth service next.
-
-   * React app throes an error page as well and disrupts the user's experience
-
-✅ **Result:** You’ve just simulated *a failure* — disabling one service has affected the entire webapp.
-
----
-
-## 🐳 5. Containerization with Docker
-
-Each service includes its own **Dockerfile**.
-
-**Example build commands:**
-
-```bash
-docker build -t react-frontend ./frontend
-docker build -t node-auth ./auth-service
-docker build -t python-backend ./backend-service
-```
-
-**Run manually:**
-
-```bash
-docker run -d -p 3000:80 react-frontend # 80 because that's the usual port for HTTP
-docker run -d -p 4000:4000 node-auth
-docker run -d -p 8000:8000 python-backend
-```
-
-**Test failure scenario again:**
-Stop one container (`docker stop python-backend`) and see that the others remain functional.
-
-✅ ***Result*** : You’ve just simulated *partial failure* — something that would crash a monolithic app, but in a microservice setup, other services stay alive.
-
----
-
-## 🧩 6. Simplified Orchestration (Docker Compose)
-
-The `docker-compose.yml` makes it easier to manage all containers.
-
-**Example:**
-
-```yaml
-version: '3.8'
-services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80" # set to open on port 80 - usual port for HTTP
-    depends_on:
-      - auth
-      - backend
-
-  auth:
-    build: ./auth-service
-    ports:
-      - "4000:4000"
-
-  backend:
-    build: ./backend-service
-    ports:
-      - "8000:8000"
-```
-
-**Run all at once:**
-
-```bash
-docker compose up --build # first time build // rebuild images before starting
-```
-
-**Other useful commands**
-
-```bash
-docker compose up -d # run in detached mode (run in background)
-```
-
-```bash
-docker compose down # stops and removes containers, networks, and default volumes creeated by Compose
-```
-
-```bash
-docker compose ps # view running services
-```
-
-```bash
-docker compose logs # view logs of conntainers managed by docker-compose
-```
-
----
-
-## 🔍 7. Architecture Diagram
-
-```
- ┌────────────┐        ┌───────────────┐        ┌─────────────┐
- │  Frontend  │ <----> │  Auth Service │ <----> │  Backend    │
- │ (React)    │        │ (Node.js)     │        │ (FastAPI)   │
- └────────────┘        └───────────────┘        └─────────────┘
-        │
-        └── Docker Network (local)
-```
-
-Each service runs independently in its own container — communicating over a shared Docker network.
-
----
-
-## 🚀 9. Deployment on AWS EC2 with K8s/ ansible & terraform (Project 3)
+## 🚀 Deployment on AWS EC2 with K8s/ ansible & terraform
 
 Follow these exact commands to provision, configure, and deploy the application from scratch.
 
@@ -260,33 +125,35 @@ git add .
 git commit -m "Triggering pipeline deployment"
 git push origin main
 ```
+### URLs
+Frontend: http://<EC2_PUBLIC_IP>:30080
+
+ArgoCD: https://<EC2_PUBLIC_IP>:30443
+
+#### View K8s cluster
+```bash
+ssh -i ~/.ssh/k8s_key.pem ubuntu@<EC2_PUBLIC_IP>
+sudo microk8s kubectl get pods
+```
 
 ---
 
-## 📸 Evidence of Working Deployment
-
-*(Drop your screenshots in the spaces below to verify the successful deployment of the project!)*
+## Evidence of Working Deployment
 
 ### 1. Terraform Infrastructure Deployed
-*Screenshot showing the `terraform apply` success output or the running EC2 instance in the AWS Console.*
-![Terraform Success](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![Terraform Success](imgs/terraform_approve.png)
 
 ### 2. Ansible Playbook Execution
-*Screenshot showing the Ansible PLAY RECAP with `ok` statuses and zero ignored errors.*
-![Ansible Success](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![Ansible Success](imgs/ansible_ok.png)
 
 ### 3. GitHub Actions CI Pipeline Success
-*Screenshot showing the green checkmarks on your GitHub Actions workflow running successfully.*
-![GitHub Actions Workflow](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![GitHub Actions Workflow](imgs/git_success.png)
 
 ### 4. ArgoCD Dashboard & Synchronization
-*Screenshot of the ArgoCD web UI (`https://<EC2_IP>:30443`) showing the `microservices-demo` application fully synced and healthy.*
-![ArgoCD Dashboard](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![ArgoCD Dashboard](imgs/argocd.png)
 
 ### 5. Running Kubernetes Pods
-*Screenshot of your SSH terminal showing `kubectl get pods` with all services in a `Running` state.*
-![Kubernetes Pods](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![Kubernetes Pods](imgs/kubectl_pods.png)
 
 ### 6. Live Application Frontend
-*Screenshot of your React application successfully loading in the browser via the EC2 Public IP on port `30080`.*
-![Live App Frontend](<PLACE_YOUR_IMAGE_LINK_HERE>)
+![Live App Frontend](imgs/app.png)
