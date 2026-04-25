@@ -1,4 +1,7 @@
-# Microservices Architecture Demo (React + Node.js + FastAPI)
+# Microservices Architecture  (React + Node.js + FastAPI)
+##Project 3 Cloud 
+->Mishal Ali 22i-1291
+-> Ayaan Mughal 22i-0861
 
 This project demonstrates how **microservices architecture** works in contrast to a monolithic setup.
 You’ll see how splitting an app into independent services helps prevent total system failure — and how Docker makes it easy to run them together locally.
@@ -7,9 +10,6 @@ You’ll see how splitting an app into independent services helps prevent total 
 
 ## Overview
 
-In a **monolithic app**, all features (frontend, authentication, business logic, database) are tightly coupled into one unit.
-If one part fails (say, the backend), the entire system can go down.
-
 **Microservices architecture** solves this by breaking an application into smaller, independent services that:
 
 * Run in isolation
@@ -17,7 +17,7 @@ If one part fails (say, the backend), the entire system can go down.
 * Can fail without crashing the entire system
 * Are easier to scale and maintain
 
-In this demo:
+In this project:
 
 * The **React app** is the frontend interface
 * The **Node.js (Express)** service handles authentication
@@ -32,7 +32,10 @@ microservices-demo/
 ├── frontend/        # React app (port 3000)
 ├── auth-service/    # Node.js auth API (port 4000)
 ├── backend-service/ # FastAPI backend (port 8000)
-└── docker-compose.yml
+├──ansible/
+├──k8s/
+├──terraform/
+└──docker-compose.yml
 ```
 
 ---
@@ -64,7 +67,7 @@ This runs the frontend on **[http://localhost:3000](http://localhost:3000)**.
 
 **Purpose:** Usually Handles authentication logic — registration, login, JWT token generation.
 
-**Our Demo:** Just shows some Auth Service text.
+**Our Project:** Just shows some Auth Service text.
 
 **Setup:**
 
@@ -214,16 +217,7 @@ Each service runs independently in its own container — communicating over a sh
 
 ---
 
-## 🧠 8. Key Learnings
-
-* Each microservice can be built, deployed, and tested independently.
-* A crash in one service does **not** affect others.
-* Docker enables isolated environments for each service.
-* Docker Compose simplifies local multi-container orchestration.
-
----
-
-## 🚀 9. Deployment on AWS EC2 with Kubernetes (Project 3)
+## 🚀 9. Deployment on AWS EC2 with K8s/ ansible & terraform (Project 3)
 
 This project has been updated to support deployment on an AWS EC2 instance running a local Kubernetes cluster (MicroK8s), fully managed via GitOps (ArgoCD) and GitHub Actions.
 
