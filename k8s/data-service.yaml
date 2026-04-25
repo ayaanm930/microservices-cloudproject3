@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: data-service
-        image: ghcr.io/ayaanm930/microservices-cloudproject3/data-service:f78bbe887b60fd96584cb3e08a7aecf186a93ae5
+        image: ghcr.io/ayaanm930/microservices-cloudproject3/data-service:ff9cb10142ca0d4dddcf20eaa6f9979f62447c1c
         ports:
         - containerPort: 8000
 ---
