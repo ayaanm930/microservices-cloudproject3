@@ -84,7 +84,7 @@ Each service runs independently in its own Kubernetes Pod — communicating over
 
 ## 🚀 Deployment on AWS EC2 with K8s/ ansible & terraform
 
-Follow these exact commands to provision, configure, and deploy the application from scratch.
+Follow these exact commands to provision, configure, and deploy the application from scratch. (Make sure terraform.tfvars exists and contains AWS credentials)
 
 ### Step 1: Provision Infrastructure (Terraform)
 Create the AWS EC2 instance, VPC, and Security Groups.
