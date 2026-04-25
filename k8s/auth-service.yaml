@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: auth-service
-        image: ghcr.io/ayaanm930/microservices-cloudproject3/auth-service:41c023bc07edc9117943d1110d604b5c4f306ed5
+        image: ghcr.io/ayaanm930/microservices-cloudproject3/auth-service:a7b82301b0e71fabaf4ebbd6c4d8e43d63d7dd6b
         ports:
         - containerPort: 4000
 ---
